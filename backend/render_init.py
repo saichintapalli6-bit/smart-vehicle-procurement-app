@@ -11,15 +11,20 @@ django.setup()
 from django.contrib.auth import get_user_model
 
 def initialize():
-    print("Starting database initialization...")
+    print(f"Starting database initialization from {BASE_DIR}...")
     manage_py_path = os.path.join(BASE_DIR, 'manage.py')
+    print(f"Using manage.py at: {manage_py_path}")
     
     # Run migrations
     try:
+        print("Running migrations...")
         execute_from_command_line([manage_py_path, 'migrate', '--noinput'])
         print("Migrations completed successfully.")
     except Exception as e:
-        print(f"Error during migrations: {e}")
+        print(f"CRITICAL ERROR during migrations: {e}")
+        # Log the full error if possible
+        import traceback
+        traceback.print_exc()
         # If migrations fail, we might still want to try creating a superuser if it's just a 'no such table' issue
 
     # Create superuser
