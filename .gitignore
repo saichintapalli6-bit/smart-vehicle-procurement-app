@@ -1,0 +1,16 @@
+# Django
+backend/venv/
+backend/__pycache__/
+backend/db.sqlite3
+backend/create_admin.py
+backend/check_db.py
+*.pyc
+
+# React Native / Expo
+SmartVehicleMobile/node_modules/
+SmartVehicleMobile/.expo/
+SmartVehicleMobile/web-build/
+
+# OS files
+.DS_Store
+Thumbs.db
