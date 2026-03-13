@@ -2,6 +2,9 @@ import os
 import django
 from django.core.management import execute_from_command_line
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smart_vehicle_backend.settings')
 django.setup()
 
@@ -9,13 +12,15 @@ from django.contrib.auth import get_user_model
 
 def initialize():
     print("Starting database initialization...")
+    manage_py_path = os.path.join(BASE_DIR, 'manage.py')
     
     # Run migrations
     try:
-        execute_from_command_line(['manage.py', 'migrate', '--noinput'])
+        execute_from_command_line([manage_py_path, 'migrate', '--noinput'])
         print("Migrations completed successfully.")
     except Exception as e:
         print(f"Error during migrations: {e}")
+        # If migrations fail, we might still want to try creating a superuser if it's just a 'no such table' issue
 
     # Create superuser
     User = get_user_model()
@@ -26,7 +31,16 @@ def initialize():
     if not User.objects.filter(username=username).exists():
         print(f"Creating superuser '{username}'...")
         try:
-            User.objects.create_superuser(username=username, email=email, password=password, role='admin')
+            user = User.objects.create_superuser(
+                username=username, 
+                email=email, 
+                password=password, 
+                role='admin'
+            )
+            user.is_active = True
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
             print(f"Superuser '{username}' created successfully!")
         except Exception as e:
             print(f"Error creating superuser: {e}")
