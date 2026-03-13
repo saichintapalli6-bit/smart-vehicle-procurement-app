@@ -2,10 +2,11 @@
 # exit on error
 set -o errexit
 
-# Go to backend directory
-cd backend
-
+# Install dependencies from root
 pip install -r requirements.txt
+
+# Go to backend directory for Django commands
+cd backend
 
 python manage.py collectstatic --no-input
 python manage.py migrate
