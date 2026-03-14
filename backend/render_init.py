@@ -22,10 +22,21 @@ def initialize():
         print("Migrations completed successfully.")
     except Exception as e:
         print(f"CRITICAL ERROR during migrations: {e}")
-        # Log the full error if possible
         import traceback
         traceback.print_exc()
-        # If migrations fail, we might still want to try creating a superuser if it's just a 'no such table' issue
+        
+        # Self-healing for "InconsistentMigrationHistory" (common when adding custom User model late)
+        if "InconsistentMigrationHistory" in str(type(e).__name__) or "InconsistentMigrationHistory" in str(e):
+            print("Detected corrupted migration history. Auto-wiping the database schema to fix...")
+            try:
+                from django.db import connection
+                with connection.cursor() as cursor:
+                    # Wipe the schema and recreate it (PostgreSQL specific)
+                    cursor.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
+                print("Database wiped! Retrying migrations from scratch...")
+                execute_from_command_line([manage_py_path, 'migrate', '--noinput'])
+            except Exception as inner_e:
+                print(f"Failed to auto-wipe database: {inner_e}")
 
     # Create superuser
     User = get_user_model()
