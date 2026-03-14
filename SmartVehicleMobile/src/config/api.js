@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 
 const LOCAL_IP = '192.168.31.216';
 const RENDER_URL = 'https://smart-vehicle-procurement-app-25lr.onrender.com';
-const USE_PRODUCTION = true; // Enabled for permanent storage
+const USE_PRODUCTION = true; // Set to true for permanent storage / production
 
 
 // Web deployment auto-detection
