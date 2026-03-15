@@ -1,93 +1,136 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Animated, Dimensions, StyleSheet, Text } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { View, StyleSheet, Dimensions, Platform, Text, Animated } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
-const { width, height } = Dimensions.get('window');
-const NUM_ICONS = 18;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-const VEHICLE_ICONS = ['🚗', '🚙', '🏎', '🚕', '🚓', '🚐', '🚌', '🚑'];
+const VEHICLES = ["🚗", "🚕", "🚙", "🏎️", "🚓", "🚑", "🚒", "🚐", "🚚", "🚛", "🚜", "🏍️", "🛵", "🚲", "🚇", "🚌", "🚎"];
 
-function rand(a, b) {
-    return a + Math.random() * (b - a);
-}
-
-const FloatingIcon = () => {
-    const posX = useRef(new Animated.Value(rand(0, width))).current;
-    const posY = useRef(new Animated.Value(rand(0, height))).current;
-    const opacity = useRef(new Animated.Value(rand(0.1, 0.4))).current;
-    const rotate = useRef(new Animated.Value(rand(-30, 30))).current;
-
-    const icon = VEHICLE_ICONS[Math.floor(Math.random() * VEHICLE_ICONS.length)];
-    const size = rand(14, 28);
-    const dur = rand(6000, 14000);
-
+const Vehicle = ({ emoji, startX, startY, onComplete }) => {
+    const animatedPos = useRef(new Animated.ValueXY({ x: startX, y: startY })).current;
+    const opacity = useRef(new Animated.Value(1)).current;
+    
     useEffect(() => {
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(posX, { toValue: rand(0, width), duration: dur, useNativeDriver: true }),
-                Animated.timing(posX, { toValue: rand(0, width), duration: dur, useNativeDriver: true }),
-                Animated.timing(posX, { toValue: rand(0, width), duration: dur, useNativeDriver: true }),
-            ])
-        ).start();
-
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(posY, { toValue: rand(0, height), duration: dur * 1.4, useNativeDriver: true }),
-                Animated.timing(posY, { toValue: rand(0, height), duration: dur * 1.4, useNativeDriver: true }),
-                Animated.timing(posY, { toValue: rand(0, height), duration: dur * 1.4, useNativeDriver: true }),
-            ])
-        ).start();
-
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(opacity, { toValue: rand(0.4, 0.7), duration: dur * 0.5, useNativeDriver: true }),
-                Animated.timing(opacity, { toValue: rand(0.05, 0.2), duration: dur * 0.5, useNativeDriver: true }),
-            ])
-        ).start();
-
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(rotate, { toValue: rand(-45, 45), duration: dur * 0.7, useNativeDriver: true }),
-                Animated.timing(rotate, { toValue: rand(-45, 45), duration: dur * 0.7, useNativeDriver: true }),
-            ])
-        ).start();
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * 400 + 200;
+        const destinationX = startX + Math.cos(angle) * distance;
+        const destinationY = startY + Math.sin(angle) * distance;
+        
+        Animated.parallel([
+            Animated.timing(animatedPos, {
+                toValue: { x: destinationX, y: destinationY },
+                duration: 3000 + Math.random() * 2000,
+                useNativeDriver: Platform.OS !== 'web',
+            }),
+            Animated.timing(opacity, {
+                toValue: 0,
+                duration: 3000 + Math.random() * 2000,
+                useNativeDriver: Platform.OS !== 'web',
+            })
+        ]).start(() => {
+            onComplete();
+        });
     }, []);
 
-    const rotation = rotate.interpolate({ inputRange: [-45, 45], outputRange: ['-45deg', '45deg'] });
-
     return (
-        <Animated.Text
-            style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                fontSize: size,
-                opacity,
-                transform: [{ translateX: posX }, { translateY: posY }, { rotate: rotation }],
-            }}
+        <Animated.View
+            style={[
+                styles.vehicle,
+                {
+                    opacity,
+                    transform: [
+                        { translateX: animatedPos.x },
+                        { translateY: animatedPos.y },
+                        { scale: Math.random() * 0.5 + 0.8 }
+                    ],
+                },
+            ]}
         >
-            {icon}
-        </Animated.Text>
+            <Text style={styles.emojiText}>{emoji}</Text>
+        </Animated.View>
     );
 };
 
-const AnimatedBackground = ({
-    colors = ['#0f0c29', '#1a1a2e', '#16213e'],
-    particleColor = '#8b5cf6',
-}) => {
+const AnimatedBackground = React.memo(({ colors, particleColor }) => {
+    const [vehicles, setVehicles] = useState([]);
+    const vehicleCount = useRef(0);
+
+    const spawnVehicle = useCallback((x, y, count = 1) => {
+        if (vehicles.length > 50) return; // Increased limit
+
+        const newVehicles = [];
+        for (let i = 0; i < count; i++) {
+            const id = ++vehicleCount.current;
+            const emoji = VEHICLES[Math.floor(Math.random() * VEHICLES.length)];
+            newVehicles.push({ id, x, y, emoji });
+        }
+        
+        setVehicles(prev => [...prev, ...newVehicles]);
+    }, [vehicles.length]);
+
+    useEffect(() => {
+        if (Platform.OS === 'web') {
+            const handleMouseMove = (e) => {
+                if (Math.random() > 0.15) return;
+                spawnVehicle(e.clientX, e.clientY);
+            };
+            const handleClick = (e) => {
+                spawnVehicle(e.clientX, e.clientY, 10); // Burst on click
+            };
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('click', handleClick);
+            return () => {
+                window.removeEventListener('mousemove', handleMouseMove);
+                window.removeEventListener('click', handleClick);
+            };
+        }
+    }, [spawnVehicle]);
+
+    const removeVehicle = (id) => {
+        setVehicles(prev => prev.filter(v => v.id !== id));
+    };
+
+    const defaultColors = colors || [
+        'rgba(20, 18, 25, 0.92)',
+        'rgba(35, 28, 40, 0.88)',
+        'rgba(48, 38, 52, 0.84)',
+        'rgba(62, 50, 68, 0.80)'
+    ];
+
     return (
-        <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+        <View style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
             <LinearGradient
-                colors={colors}
-                style={StyleSheet.absoluteFillObject}
+                colors={defaultColors}
+                style={StyleSheet.absoluteFill}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
             />
-            {Array.from({ length: NUM_ICONS }).map((_, i) => (
-                <FloatingIcon key={i} />
+            {vehicles.map(v => (
+                <Vehicle 
+                    key={v.id} 
+                    emoji={v.emoji} 
+                    startX={v.x} 
+                    startY={v.y} 
+                    onComplete={() => removeVehicle(v.id)} 
+                />
             ))}
         </View>
     );
-};
+});
 
-export default AnimatedBackground;
+const styles = StyleSheet.create({
+    vehicle: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emojiText: {
+        fontSize: 24,
+    }
+});
+
+export default AnimatedBackground;

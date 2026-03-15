@@ -11,6 +11,7 @@ import BuyerDashboard from './src/screens/BuyerDashboard';
 import SellerDashboard from './src/screens/SellerDashboard';
 import AdminDashboard from './src/screens/AdminDashboard';
 import WebViewScreen from './src/screens/WebViewScreen';
+import DemoScreen from './src/screens/DemoScreen';
 
 const Stack = createStackNavigator();
 
@@ -41,6 +42,7 @@ export default function App() {
           <Stack.Screen name="BuyerDashboard" component={BuyerDashboard} />
           <Stack.Screen name="SellerDashboard" component={SellerDashboard} />
           <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+          <Stack.Screen name="Demo" component={DemoScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

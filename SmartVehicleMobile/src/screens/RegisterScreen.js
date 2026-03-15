@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     View, Text, StyleSheet, TextInput, TouchableOpacity,
     ActivityIndicator, Platform, ScrollView, Dimensions,
@@ -21,7 +21,7 @@ const RegisterScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [focusedField, setFocusedField] = useState(null);
     const [fieldErrors, setFieldErrors] = useState({});
-    const [toast, setToast] = useState(null); // { type: 'success'|'error', msg: '' }
+    const [toast, setToast] = useState(null);
 
     const update = (key, val) => {
         setForm(prev => ({ ...prev, [key]: val }));
@@ -31,7 +31,6 @@ const RegisterScreen = ({ navigation }) => {
     const showToast = (type, msg) => {
         setToast({ type, msg });
         if (type === 'success') {
-            // Auto navigate to Login after 2 seconds
             setTimeout(() => {
                 setToast(null);
                 navigation.navigate('Login');
@@ -100,40 +99,44 @@ const RegisterScreen = ({ navigation }) => {
     };
 
     const roles = [
-        { key: 'buyer', label: '🛒 Buyer', color: '#10b981', bg: 'rgba(16,185,129,0.15)', border: '#10b981' },
-        { key: 'seller', label: '🚗 Seller', color: '#60a5fa', bg: 'rgba(96,165,250,0.15)', border: '#60a5fa' },
+        { key: 'buyer', label: '🛒 Buyer', color: '#22c55e', bg: 'rgba(34,197,94,0.15)', border: '#22c55e' },
+        { key: 'seller', label: '🚗 Seller', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', border: '#f59e0b' },
     ];
 
-    const fields = [
-        { key: 'name', label: 'Full Name', icon: <User color="#475569" size={18} />, placeholder: 'Enter your full name', secure: false, keyboard: 'default' },
-        { key: 'email', label: 'Email Address', icon: <Mail color="#475569" size={18} />, placeholder: 'Enter your email', secure: false, keyboard: 'email-address' },
-        { key: 'loginid', label: 'Login ID', icon: <User color="#475569" size={18} />, placeholder: 'Choose a login ID', secure: false, keyboard: 'default' },
-        { key: 'mobile', label: 'Mobile Number', icon: <Phone color="#475569" size={18} />, placeholder: '10-digit mobile', secure: false, keyboard: 'phone-pad' },
-        { key: 'password', label: 'Password', icon: <Lock color="#475569" size={18} />, placeholder: 'Min 8 characters', secure: true, keyboard: 'default' },
-        { key: 'confirmPassword', label: 'Confirm Password', icon: <Lock color="#475569" size={18} />, placeholder: 'Re-enter password', secure: true, keyboard: 'default' },
-    ];
+    const fields = useMemo(() => {
+        const baseFields = [
+            { key: 'name', label: 'Full Name', icon: <User color="#8b949e" size={20} />, placeholder: 'Enter your full name', secure: false, keyboard: 'default' },
+            { key: 'email', label: 'Email Address', icon: <Mail color="#8b949e" size={20} />, placeholder: 'Enter your email', secure: false, keyboard: 'email-address' },
+            { key: 'loginid', label: 'Login ID', icon: <User color="#8b949e" size={20} />, placeholder: 'Choose a login ID', secure: false, keyboard: 'default' },
+            { key: 'mobile', label: 'Mobile Number', icon: <Phone color="#8b949e" size={20} />, placeholder: '10-digit mobile', secure: false, keyboard: 'phone-pad' },
+            { key: 'password', label: 'Password', icon: <Lock color="#8b949e" size={20} />, placeholder: 'Min 8 characters', secure: true, keyboard: 'default' },
+            { key: 'confirmPassword', label: 'Confirm Password', icon: <Lock color="#8b949e" size={20} />, placeholder: 'Re-enter password', secure: true, keyboard: 'default' },
+        ];
 
-    if (role === 'seller') {
-        fields.push(
-            { key: 'bank_account_number', label: 'Bank Account Number', icon: <CreditCard color="#475569" size={18} />, placeholder: 'Enter Account Number', secure: false, keyboard: 'number-pad' },
-            { key: 'ifsc_code', label: 'IFSC Code', icon: <Library color="#475569" size={18} />, placeholder: 'Enter IFSC Code', secure: false, keyboard: 'default' },
-            { key: 'bank_name', label: 'Bank Name', icon: <Library color="#475569" size={18} />, placeholder: 'Enter Bank Name', secure: false, keyboard: 'default' }
-        );
-    }
+        if (role === 'seller') {
+            baseFields.push(
+                { key: 'bank_account_number', label: 'Bank Account Number', icon: <CreditCard color="#8b949e" size={20} />, placeholder: 'Enter Account Number', secure: false, keyboard: 'number-pad' },
+                { key: 'ifsc_code', label: 'IFSC Code', icon: <Library color="#8b949e" size={20} />, placeholder: 'Enter IFSC Code', secure: false, keyboard: 'default' },
+                { key: 'bank_name', label: 'Bank Name', icon: <Library color="#8b949e" size={20} />, placeholder: 'Enter Bank Name', secure: false, keyboard: 'default' }
+            );
+        }
 
-    const stylesOptions = getStyles(isLargeWeb);
+        return baseFields;
+    }, [role]);
 
+    const stylesOptions = useMemo(() => getStyles(isLargeWeb), [isLargeWeb]);
 
     return (
         <View style={stylesOptions.root}>
-            <AnimatedBackground colors={['#060714', '#0a1020', '#0d1830']} particleColor="#22d3ee" />
+            {/* ✅ FIXED: No inline arrays allowed to prevent remounts */}
+            <AnimatedBackground />
 
             {/* Toast Notification */}
             {toast && (
                 <View style={[stylesOptions.toast, toast.type === 'success' ? stylesOptions.toastSuccess : stylesOptions.toastError]}>
                     {toast.type === 'success'
-                        ? <CheckCircle color="#10b981" size={20} />
-                        : <XCircle color="#ef4444" size={20} />}
+                        ? <CheckCircle color="#22c55e" size={20} />
+                        : <XCircle color="#f87171" size={20} />}
                     <Text style={stylesOptions.toastText}>{toast.msg}</Text>
                 </View>
             )}
@@ -141,15 +144,15 @@ const RegisterScreen = ({ navigation }) => {
             {/* Navbar */}
             <View style={stylesOptions.navbar}>
                 <TouchableOpacity style={stylesOptions.navBrand} onPress={() => navigation.navigate('Home')}>
-                    <Car color="#22d3ee" size={24} />
-                    <Text style={stylesOptions.brandText}>Smart Vehicle Procurement</Text>
+                    <Car color="#f0b90b" size={24} />
+                    <Text style={stylesOptions.brandText}>VehicleChain Pro</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                     <Text style={stylesOptions.navLink}>Sign In →</Text>
                 </TouchableOpacity>
             </View>
 
-            <ScrollView contentContainerStyle={stylesOptions.scrollContent} showsVerticalScrollIndicator={false}>
+            <ScrollView keyboardShouldPersistTaps="always" keyboardDismissMode="none" contentContainerStyle={stylesOptions.scrollContent} showsVerticalScrollIndicator={false}>
                 <View style={stylesOptions.centerWrapper}>
                     {/* Left Panel - Web only */}
                     {isLargeWeb && (
@@ -184,7 +187,7 @@ const RegisterScreen = ({ navigation }) => {
                     {/* Register Card */}
                     <View style={stylesOptions.card}>
                         <LinearGradient
-                            colors={['rgba(34,211,238,0.06)', 'rgba(37,99,235,0.03)']}
+                            colors={['rgba(240,185,11,0.12)', 'rgba(234,179,8,0.08)']}
                             style={StyleSheet.absoluteFillObject}
                             start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                         />
@@ -218,14 +221,12 @@ const RegisterScreen = ({ navigation }) => {
                                         <TextInput
                                             style={stylesOptions.input}
                                             placeholder={f.placeholder}
-                                            placeholderTextColor="#334155"
+                                            placeholderTextColor="#8b949e"
                                             value={form[f.key]}
                                             onChangeText={(v) => update(f.key, v)}
                                             secureTextEntry={f.secure}
                                             keyboardType={f.keyboard}
                                             autoCapitalize="none"
-                                            onFocus={() => setFocusedField(f.key)}
-                                            onBlur={() => setFocusedField(null)}
                                         />
                                     </View>
                                     {fieldErrors[f.key] && (
@@ -244,10 +245,20 @@ const RegisterScreen = ({ navigation }) => {
 
                         {/* Register Button */}
                         <TouchableOpacity style={stylesOptions.regBtn} onPress={handleRegister} disabled={loading}>
-                            <LinearGradient colors={['#06b6d4', '#2563eb']} style={stylesOptions.regBtnGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+                            <LinearGradient 
+                                colors={['#f0b90b', '#eab308', '#ca8a04']} 
+                                style={stylesOptions.regBtnGrad} 
+                                start={{ x: 0, y: 0 }} 
+                                end={{ x: 1, y: 1 }}
+                            >
                                 {loading
-                                    ? <ActivityIndicator color="#fff" />
-                                    : <><Text style={stylesOptions.regBtnText}>Create Account</Text><ChevronRight color="#fff" size={20} /></>
+                                    ? <ActivityIndicator color="#1f2937" />
+                                    : (
+                                        <>
+                                            <Text style={stylesOptions.regBtnText}>Create Account</Text>
+                                            <ChevronRight color="#1f2937" size={20} />
+                                        </>
+                                    )
                                 }
                             </LinearGradient>
                         </TouchableOpacity>
@@ -263,113 +274,328 @@ const RegisterScreen = ({ navigation }) => {
 };
 
 const getStyles = (isLargeWeb) => StyleSheet.create({
-    root: { flex: 1, backgroundColor: '#060714' },
+    root: { 
+        flex: 1, 
+        backgroundColor: '#0c0f15' // Perfect GitHub dark base
+    },
 
-    // TOAST
+    // TOAST - Professional notifications
     toast: {
-        position: 'absolute', top: 70, left: '50%',
-        transform: [{ translateX: -150 }],
-        width: 300,
-        flexDirection: 'row', alignItems: 'center', gap: 10,
-        paddingHorizontal: 20, paddingVertical: 14, borderRadius: 14,
-        zIndex: 999, borderWidth: 1,
+        position: 'absolute', 
+        top: 70, 
+        alignSelf: 'center',
+        width: isLargeWeb ? 480 : '90%',
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        gap: 12,
+        paddingHorizontal: 24, 
+        paddingVertical: 16,
+        borderRadius: 16, 
+        zIndex: 999, 
+        borderWidth: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+        elevation: 8,
     },
-    toastSuccess: {
-        backgroundColor: 'rgba(16,185,129,0.15)',
-        borderColor: 'rgba(16,185,129,0.4)',
+    toastSuccess: { 
+        backgroundColor: 'rgba(34,197,94,0.15)', 
+        borderColor: 'rgba(34,197,94,0.4)' 
     },
-    toastError: {
-        backgroundColor: 'rgba(239,68,68,0.15)',
-        borderColor: 'rgba(239,68,68,0.4)',
+    toastError: { 
+        backgroundColor: 'rgba(248,113,113,0.15)', 
+        borderColor: 'rgba(248,113,113,0.4)' 
     },
-    toastText: { color: '#fff', fontSize: 14, fontWeight: '600', flex: 1 },
+    toastText: { 
+        color: '#f0f6fc', 
+        fontSize: 15, 
+        fontWeight: '700', 
+        flex: 1 
+    },
 
-    // NAVBAR
+    // NAVBAR - Luxury gold theme
     navbar: {
-        position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100,
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: isLargeWeb ? 60 : 20, paddingVertical: 14,
-        backgroundColor: 'rgba(6,7,20,0.9)',
-        borderBottomWidth: 1, borderBottomColor: 'rgba(34,211,238,0.1)',
+        position: 'absolute', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        zIndex: 100,
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        paddingHorizontal: isLargeWeb ? 60 : 24, 
+        paddingVertical: 18,
+        backgroundColor: 'rgba(22, 27, 34, 0.96)',
+        backdropFilter: 'blur(32px)',
+        borderBottomWidth: 1, 
+        borderBottomColor: 'rgba(240,185,11,0.25)',
     },
-    navBrand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    brandText: { color: '#fff', fontSize: isLargeWeb ? 17 : 13, fontWeight: 'bold', marginLeft: 8 },
-    navLink: { color: '#22d3ee', fontSize: isLargeWeb ? 15 : 13, fontWeight: '600' },
+    navBrand: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        gap: 14 
+    },
+    brandText: { 
+        color: '#f0f6fc', 
+        fontSize: isLargeWeb ? 20 : 16, 
+        fontWeight: '900', 
+        letterSpacing: -0.5 
+    },
+    navLink: { 
+        color: '#f0b90b', 
+        fontSize: isLargeWeb ? 15 : 14, 
+        fontWeight: '700' 
+    },
 
     scrollContent: {
-        flexGrow: 1, justifyContent: 'center', alignItems: 'center',
-        paddingTop: 90, paddingBottom: 40, paddingHorizontal: isLargeWeb ? 40 : 16,
+        flexGrow: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        paddingTop: 90, 
+        paddingBottom: 60, 
+        paddingHorizontal: isLargeWeb ? 40 : 24,
     },
     centerWrapper: {
-        flexDirection: isLargeWeb ? 'row' : 'column',
-        alignItems: isLargeWeb ? 'flex-start' : 'center',
-        gap: isLargeWeb ? 60 : 0,
-        width: '100%', maxWidth: isLargeWeb ? 1100 : 500, justifyContent: 'center',
+        flexDirection: isLargeWeb ? 'row' : 'column', 
+        alignItems: 'center',
+        gap: isLargeWeb ? 80 : 40, 
+        width: '100%',
+        maxWidth: isLargeWeb ? 1200 : 520, 
+        justifyContent: 'center',
     },
 
-    leftPanel: { flex: 1, maxWidth: 400, paddingRight: 10, paddingTop: 10 },
+    // LEFT PANEL
+    leftPanel: { 
+        flex: 1, 
+        maxWidth: 480, 
+        paddingRight: 24 
+    },
     leftBadge: {
-        backgroundColor: 'rgba(34,211,238,0.1)', borderWidth: 1,
-        borderColor: 'rgba(34,211,238,0.3)', paddingHorizontal: 14,
-        paddingVertical: 6, borderRadius: 20, alignSelf: 'flex-start', marginBottom: 28,
+        backgroundColor: 'rgba(240,185,11,0.18)', 
+        borderWidth: 1,
+        borderColor: 'rgba(240,185,11,0.4)', 
+        paddingHorizontal: 18,
+        paddingVertical: 8, 
+        borderRadius: 24, 
+        alignSelf: 'flex-start', 
+        marginBottom: 32,
     },
-    leftBadgeText: { color: '#22d3ee', fontSize: 13, fontWeight: '600' },
-    leftTitle: { fontSize: isLargeWeb ? 48 : 32, fontWeight: 'bold', color: '#fff', lineHeight: isLargeWeb ? 58 : 40, marginBottom: 18 },
-    leftSubtitle: { fontSize: isLargeWeb ? 16 : 14, color: '#64748b', lineHeight: 26, marginBottom: 36 },
-    steps: { gap: 20 },
-    step: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+    leftBadgeText: { 
+        color: '#f0b90b', 
+        fontSize: 14, 
+        fontWeight: '800',
+        letterSpacing: 1 
+    },
+    leftTitle: {
+        fontSize: isLargeWeb ? 56 : 40, 
+        fontWeight: '900', 
+        color: '#f0f6fc',
+        lineHeight: isLargeWeb ? 68 : 48, 
+        marginBottom: 24,
+        letterSpacing: -1,
+    },
+    leftSubtitle: { 
+        fontSize: isLargeWeb ? 18 : 15, 
+        color: '#c9d1d9', 
+        lineHeight: 28, 
+        marginBottom: 32 
+    },
+    steps: { 
+        gap: 20 
+    },
+    step: { 
+        flexDirection: 'row', 
+        alignItems: 'flex-start', 
+        gap: 16 
+    },
     stepNum: {
-        width: 44, height: 44, borderRadius: 12,
-        backgroundColor: 'rgba(34,211,238,0.1)', borderWidth: 1,
-        borderColor: 'rgba(34,211,238,0.3)', justifyContent: 'center', alignItems: 'center',
+        width: 48, 
+        height: 48, 
+        borderRadius: 16,
+        backgroundColor: 'rgba(240,185,11,0.18)', 
+        borderWidth: 1,
+        borderColor: 'rgba(240,185,11,0.4)', 
+        justifyContent: 'center', 
+        alignItems: 'center',
     },
-    stepNumText: { color: '#22d3ee', fontWeight: 'bold', fontSize: 13 },
-    stepTitle: { color: '#fff', fontWeight: 'bold', fontSize: 15, marginBottom: 2 },
-    stepSub: { color: '#475569', fontSize: 13 },
+    stepNumText: { 
+        color: '#f0b90b', 
+        fontWeight: '900', 
+        fontSize: 15 
+    },
+    stepTitle: { 
+        color: '#f0f6fc', 
+        fontWeight: '800', 
+        fontSize: 16, 
+        marginBottom: 4 
+    },
+    stepSub: { 
+        color: '#c9d1d9', 
+        fontSize: 14 
+    },
 
+    // REGISTER CARD
     card: {
-        width: isLargeWeb ? 580 : '100%', borderRadius: 24, borderWidth: 1,
-        borderColor: 'rgba(34,211,238,0.15)', padding: isLargeWeb ? 40 : 24,
-        overflow: 'hidden', backgroundColor: 'rgba(10,15,35,0.85)',
+        width: isLargeWeb ? 480 : '100%', 
+        borderRadius: 28, 
+        borderWidth: 1,
+        borderColor: 'rgba(240,185,11,0.25)', 
+        padding: isLargeWeb ? 48 : 36,
+        overflow: 'hidden', 
+        backgroundColor: 'rgba(22, 27, 34, 0.9)',
+        shadowColor: '#f0b90b',
+        shadowOffset: { width: 0, height: 20 },
+        shadowOpacity: 0.3,
+        shadowRadius: 35,
+        elevation: 15,
     },
-    cardTitle: { fontSize: isLargeWeb ? 28 : 24, fontWeight: 'bold', color: '#fff', marginBottom: 6 },
-    cardSubtitle: { fontSize: isLargeWeb ? 15 : 13, color: '#475569', marginBottom: 24 },
+    cardTitle: { 
+        fontSize: isLargeWeb ? 34 : 28, 
+        fontWeight: '900', 
+        color: '#f0f6fc', 
+        marginBottom: 8,
+        letterSpacing: -0.8 
+    },
+    cardSubtitle: { 
+        fontSize: isLargeWeb ? 17 : 15, 
+        color: '#c9d1d9', 
+        marginBottom: 32 
+    },
 
+    // Role selector
     roleRow: {
-        flexDirection: 'row', gap: 12, marginBottom: 24,
-        backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 14, padding: 5,
+        flexDirection: 'row', 
+        gap: 12, 
+        marginBottom: 28,
+        backgroundColor: 'rgba(255,255,255,0.06)',
+        borderRadius: 16, 
+        padding: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(240,185,11,0.2)',
     },
-    roleBtn: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 10 },
-    roleBtnText: { color: '#475569', fontWeight: '700', fontSize: isLargeWeb ? 15 : 13 },
+    roleBtn: { 
+        flex: 1, 
+        paddingVertical: 14, 
+        alignItems: 'center', 
+        borderRadius: 12 
+    },
+    roleBtnText: { 
+        color: '#8b949e', 
+        fontWeight: '700', 
+        fontSize: isLargeWeb ? 16 : 15 
+    },
 
-    fieldsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginBottom: 16 },
-    fieldsList: { gap: 14, marginBottom: 16 },
-    fieldGroup: { width: '100%' },
-    fieldGroupWeb: { width: '47%' },
-    fieldLabel: { color: '#94a3b8', fontSize: 13, fontWeight: '600', marginBottom: 6 },
+    // Form fields
+    fieldsGrid: { 
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        gap: 16, 
+        marginBottom: 20 
+    },
+    fieldsList: { 
+        gap: 16, 
+        marginBottom: 20 
+    },
+    fieldGroup: { 
+        width: '100%' 
+    },
+    fieldGroupWeb: { 
+        width: '48%' 
+    },
+    fieldLabel: { 
+        color: '#c9d1d9', 
+        fontSize: 14, 
+        fontWeight: '600', 
+        marginBottom: 8 
+    },
     inputWrapper: {
-        flexDirection: 'row', alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 12,
-        borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
-        paddingHorizontal: 14, height: isLargeWeb ? 48 : 46, gap: 10,
+        flexDirection: 'row', 
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.08)', 
+        borderRadius: 16,
+        borderWidth: 1, 
+        borderColor: 'rgba(255,255,255,0.12)',
+        paddingHorizontal: 20, 
+        height: isLargeWeb ? 60 : 56, 
+        gap: 14,
     },
-    inputFocused: { borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,0.05)' },
-    inputError: { borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.05)' },
-    input: { flex: 1, color: '#fff', fontSize: isLargeWeb ? 15 : 14, height: '100%', outlineStyle: 'none' },
-    errorText: { color: '#f87171', fontSize: 12, marginTop: 4 },
+    inputFocused: { 
+        borderColor: '#f0b90b', 
+        backgroundColor: 'rgba(240,185,11,0.12)',
+        shadowColor: '#f0b90b',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+    },
+    inputError: { 
+        borderColor: '#f87171', 
+        backgroundColor: 'rgba(248,113,113,0.1)' 
+    },
+    input: { 
+        flex: 1, 
+        color: '#f0f6fc', 
+        fontSize: isLargeWeb ? 17 : 16, 
+        height: '100%',
+        fontWeight: '500'
+    },
+    errorText: { 
+        color: '#f87171', 
+        fontSize: 13, 
+        marginTop: 6,
+        fontWeight: '600' 
+    },
 
+    // Info box
     infoBox: {
-        backgroundColor: 'rgba(34,211,238,0.05)', borderWidth: 1,
-        borderColor: 'rgba(34,211,238,0.15)', borderRadius: 12, padding: 14, marginBottom: 20,
+        backgroundColor: 'rgba(240,185,11,0.12)', 
+        borderWidth: 1,
+        borderColor: 'rgba(240,185,11,0.3)', 
+        borderRadius: 16, 
+        padding: 18, 
+        marginBottom: 28,
     },
-    infoText: { color: '#64748b', fontSize: 13, lineHeight: 20 },
+    infoText: { 
+        color: '#f0f6fc', 
+        fontSize: 14, 
+        lineHeight: 22,
+        fontWeight: '500' 
+    },
 
-    regBtn: { height: isLargeWeb ? 52 : 48, borderRadius: 14, overflow: 'hidden', marginBottom: 16 },
-    regBtnGrad: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 },
-    regBtnText: { color: '#fff', fontWeight: 'bold', fontSize: isLargeWeb ? 17 : 15 },
+    // Register button
+    regBtn: { 
+        height: isLargeWeb ? 60 : 56, 
+        borderRadius: 16, 
+        overflow: 'hidden', 
+        marginBottom: 24,
+        shadowColor: '#ca8a04',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.4,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    regBtnGrad: { 
+        flex: 1, 
+        flexDirection: 'row', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        gap: 10 
+    },
+    regBtnText: { 
+        color: '#1f2937', 
+        fontWeight: '900', 
+        fontSize: isLargeWeb ? 18 : 17,
+        letterSpacing: 0.5 
+    },
 
-    loginLink: { alignItems: 'center' },
-    loginLinkText: { color: '#22d3ee', fontSize: isLargeWeb ? 14 : 13, fontWeight: '600' },
+    loginLink: { 
+        alignItems: 'center' 
+    },
+    loginLinkText: { 
+        color: '#f0b90b', 
+        fontSize: isLargeWeb ? 16 : 15, 
+        fontWeight: '700' 
+    },
 });
 
 export default RegisterScreen;
