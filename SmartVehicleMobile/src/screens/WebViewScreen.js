@@ -13,7 +13,7 @@ import { WebView } from 'react-native-webview';
 import { Car } from 'lucide-react-native';
 
 const WebViewScreen = () => {
-    const WEB_URL = 'https://digital-smart-vehicle-procurement.onrender.com';
+    const WEB_URL = 'https://smart-vehicle-procurement-app-25lr.onrender.com';
 
     return (
         <SafeAreaView style={styles.container}>
