@@ -11,7 +11,7 @@ import { ENDPOINTS } from '../config/api';
 
 const RegisterScreen = ({ navigation }) => {
     const { width } = Dimensions.get('window');
-    const isLargeWeb = Platform.OS === 'web' && width > 800;
+    const isLargeWeb = Platform.OS === 'web';
 
     const [form, setForm] = useState({
         name: '', email: '', loginid: '', mobile: '', password: '', confirmPassword: '',

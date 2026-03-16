@@ -37,9 +37,9 @@ const SellerDashboard = ({ route, navigation }) => {
     const glowAnim = useRef(new Animated.Value(0)).current;
     
     const { width: screenWidth } = useWindowDimensions();
-    const isDesktop = screenWidth > 1024;
-    const isTablet = screenWidth > 600 && screenWidth <= 1024;
-    const isMobile = screenWidth <= 600;
+    const isDesktop = Platform.OS === 'web' || screenWidth > 1024;
+    const isTablet = Platform.OS !== 'web' && screenWidth > 600 && screenWidth <= 1024;
+    const isMobile = Platform.OS !== 'web' && screenWidth <= 600;
 
     const [activeTab, setActiveTab] = useState('add');
     const [vehicles, setVehicles] = useState([]);

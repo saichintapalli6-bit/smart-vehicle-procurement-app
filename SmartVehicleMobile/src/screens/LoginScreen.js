@@ -11,7 +11,7 @@ import { ENDPOINTS } from '../config/api';
 
 const LoginScreen = ({ navigation, route }) => {
     const { width } = Dimensions.get('window');
-    const isLargeWeb = Platform.OS === 'web' && width > 800;
+    const isLargeWeb = Platform.OS === 'web';
 
     // Pre-select role if passed from Home page buttons
     const defaultRole = route?.params?.role || 'buyer';
@@ -19,6 +19,7 @@ const LoginScreen = ({ navigation, route }) => {
     const [loginid, setLoginid] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState(defaultRole);
+    const isMobile = Platform.OS !== 'web' && width < 768;
     const [loading, setLoading] = useState(false);
     const [focusedField, setFocusedField] = useState(null);
     const [toast, setToast] = useState(null);

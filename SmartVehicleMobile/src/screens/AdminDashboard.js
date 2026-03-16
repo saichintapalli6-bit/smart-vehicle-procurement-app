@@ -20,7 +20,7 @@ const AdminDashboard = ({ route, navigation }) => {
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(null);
     const { width: screenWidth } = useWindowDimensions();
-    const isMobile = screenWidth < 768;
+    const isMobile = Platform.OS !== 'web' && screenWidth < 768;
 
     // 🎬 ENTRANCE ANIMATIONS
     const fadeAnim = useRef(new Animated.Value(0)).current;

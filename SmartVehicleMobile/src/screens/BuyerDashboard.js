@@ -27,7 +27,7 @@ const BuyerDashboard = ({ route, navigation }) => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const { width: screenWidth } = useWindowDimensions();
-    const isLargeScreen = screenWidth > 768;
+    const isLargeScreen = Platform.OS === 'web' || screenWidth > 768;
     const isTablet = screenWidth > 480 && screenWidth <= 768;
 
     // Purchase Modal States
