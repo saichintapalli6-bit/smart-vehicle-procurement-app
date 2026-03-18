@@ -141,6 +141,24 @@ def seller_update_transaction(request):
         return JsonResponse({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['DELETE'])
+def seller_delete_vehicle(request, vehicle_id):
+    seller_id = request.data.get('seller_id')
+    try:
+        vehicle = Vehicle.objects.get(id=vehicle_id, seller_id=seller_id)
+        if vehicle.status in ['pending', 'sold']:
+            return JsonResponse(
+                {"error": "Cannot delete a vehicle that is pending or already sold."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        vehicle.delete()
+        return JsonResponse({"message": "Vehicle deleted successfully."})
+    except Vehicle.DoesNotExist:
+        return JsonResponse({"error": "Vehicle not found or not owned by you."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 # --- ADMIN ---
 
 @api_view(['GET'])

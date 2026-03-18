@@ -8,7 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import {
     Car, PlusCircle, History, LogOut, RefreshCcw, CheckCircle, 
     XCircle, Hash, AlertTriangle, FileText, Upload, Shield, 
-    Sparkles, ChevronRight, Database, Zap, Camera, File
+    Sparkles, ChevronRight, Database, Zap, Camera, File, Trash2
 } from 'lucide-react-native';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
@@ -59,6 +59,11 @@ const SellerDashboard = ({ route, navigation }) => {
     const [txnModalVisible, setTxnModalVisible] = useState(false);
     const [selectedHash, setSelectedHash] = useState('');
     const [sellerTxnIdInput, setSellerTxnIdInput] = useState('');
+
+    // 🗑️ DELETE CONFIRMATION STATE
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [vehicleToDelete, setVehicleToDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
 
     // ✨ ENTRANCE ANIMATION
     useEffect(() => {
@@ -115,9 +120,33 @@ const SellerDashboard = ({ route, navigation }) => {
             });
             setTxnModalVisible(false);
             showToast('success', res.data.message || 'Transaction ID submitted successfully!');
-            fetchHistory(); // Refresh to show status
+            fetchHistory();
         } catch (err) {
             showToast('error', err.response?.data?.error || 'Failed to submit transaction ID');
+        }
+    };
+
+    // 🗑️ DELETE VEHICLE HANDLER
+    const openDeleteModal = (vehicle) => {
+        setVehicleToDelete(vehicle);
+        setDeleteModalVisible(true);
+    };
+
+    const handleDeleteVehicle = async () => {
+        if (!vehicleToDelete) return;
+        setDeleting(true);
+        try {
+            await axios.delete(ENDPOINTS.SELLER_DELETE_VEHICLE(vehicleToDelete.id), {
+                data: { seller_id: user.id }
+            });
+            setDeleteModalVisible(false);
+            setVehicleToDelete(null);
+            showToast('success', `Vehicle ${vehicleToDelete.vehicle_number} deleted successfully! 🗑️`);
+            fetchHistory();
+        } catch (err) {
+            showToast('error', err.response?.data?.error || 'Failed to delete vehicle');
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -576,6 +605,16 @@ const SellerDashboard = ({ route, navigation }) => {
                                                                     <Text style={styles.txnBtnText}>+ Add Transaction ID</Text>
                                                                 </TouchableOpacity>
                                                             )}
+                                                            {/* 🗑️ DELETE BUTTON - only for available vehicles */}
+                                                            {v.status === 'available' && (
+                                                                <TouchableOpacity
+                                                                    style={styles.deleteVehicleBtn}
+                                                                    onPress={() => openDeleteModal(v)}
+                                                                >
+                                                                    <Trash2 color="#EF4444" size={18} />
+                                                                    <Text style={styles.deleteVehicleBtnText}>Delete Vehicle</Text>
+                                                                </TouchableOpacity>
+                                                            )}
                                                         </View>
                                                     );
                                                 })}
@@ -606,6 +645,50 @@ const SellerDashboard = ({ route, navigation }) => {
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.modalConfirm} onPress={submitSellerTxnId}>
                                 <Text style={styles.modalConfirmText}>Submit</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            )}
+
+            {/* 🗑️ DELETE CONFIRMATION MODAL */}
+            {deleteModalVisible && vehicleToDelete && (
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContainer, styles.deleteModalContainer]}>
+                        <View style={styles.deleteModalIcon}>
+                            <Trash2 color="#EF4444" size={40} />
+                        </View>
+                        <Text style={styles.deleteModalTitle}>Delete Vehicle</Text>
+                        <Text style={styles.deleteModalSubtitle}>
+                            Are you sure you want to delete
+                        </Text>
+                        <Text style={styles.deleteModalVehicleNum}>
+                            {vehicleToDelete.vehicle_number}
+                        </Text>
+                        <Text style={styles.deleteModalWarning}>
+                            ⚠️ This will permanently remove the vehicle from all dashboards.
+                        </Text>
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={styles.modalCancel}
+                                onPress={() => { setDeleteModalVisible(false); setVehicleToDelete(null); }}
+                                disabled={deleting}
+                            >
+                                <Text style={styles.modalCancelText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.deleteConfirmBtn, deleting && { opacity: 0.6 }]}
+                                onPress={handleDeleteVehicle}
+                                disabled={deleting}
+                            >
+                                {deleting ? (
+                                    <ActivityIndicator color="#fff" size="small" />
+                                ) : (
+                                    <>
+                                        <Trash2 color="#fff" size={18} />
+                                        <Text style={styles.deleteConfirmBtnText}>Yes, Delete</Text>
+                                    </>
+                                )}
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -911,6 +994,47 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0b90b',
     },
     modalConfirmText: { color: '#000000', fontSize: 18, fontWeight: '800' },
+
+    // 🗑️ DELETE VEHICLE BUTTON
+    deleteVehicleBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        paddingHorizontal: 20,
+        paddingVertical: 14,
+        borderRadius: 20,
+        borderWidth: 1.5,
+        borderColor: '#EF4444',
+        backgroundColor: 'rgba(239,68,68,0.1)',
+        alignSelf: 'flex-start',
+        marginTop: 4,
+    },
+    deleteVehicleBtnText: { color: '#EF4444', fontSize: 15, fontWeight: '700' },
+
+    // 🗑️ DELETE MODAL
+    deleteModalContainer: {
+        borderColor: '#EF4444',
+        shadowColor: '#EF4444',
+        alignItems: 'center',
+    },
+    deleteModalIcon: {
+        width: 80, height: 80,
+        borderRadius: 40,
+        backgroundColor: 'rgba(239,68,68,0.15)',
+        borderWidth: 2, borderColor: '#EF4444',
+        alignItems: 'center', justifyContent: 'center',
+        marginBottom: 20,
+    },
+    deleteModalTitle: { color: '#ffffff', fontSize: 28, fontWeight: '900', marginBottom: 8, textAlign: 'center' },
+    deleteModalSubtitle: { color: '#94A3B8', fontSize: 16, textAlign: 'center' },
+    deleteModalVehicleNum: { color: '#f0b90b', fontSize: 26, fontWeight: '900', textAlign: 'center', marginVertical: 8 },
+    deleteModalWarning: { color: '#F59E0B', fontSize: 14, textAlign: 'center', marginBottom: 32, paddingHorizontal: 12 },
+    deleteConfirmBtn: {
+        flexDirection: 'row', alignItems: 'center', gap: 10,
+        paddingHorizontal: 36, paddingVertical: 16, borderRadius: 24,
+        backgroundColor: '#EF4444',
+    },
+    deleteConfirmBtnText: { color: '#ffffff', fontSize: 17, fontWeight: '800' },
 });
 
 export default SellerDashboard;

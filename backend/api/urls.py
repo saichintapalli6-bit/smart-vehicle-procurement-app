@@ -12,6 +12,7 @@ urlpatterns = [
     path('seller/add-vehicle/', views.seller_add_vehicle),
     path('seller/vehicle-history/', views.seller_vehicle_history),
     path('seller/update-transaction/', views.seller_update_transaction),
+    path('seller/delete-vehicle/<int:vehicle_id>/', views.seller_delete_vehicle),
     
     # Buyer
     path('browse-vehicles/', views.browse_vehicles),

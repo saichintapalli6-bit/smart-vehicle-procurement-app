@@ -28,6 +28,7 @@ export const ENDPOINTS = {
     SELLER_ADD_VEHICLE: `${API_BASE}/api/seller/add-vehicle/`,
     SELLER_VEHICLE_HISTORY: `${API_BASE}/api/seller/vehicle-history/`,
     SELLER_UPDATE_TRANSACTION: `${API_BASE}/api/seller/update-transaction/`,
+    SELLER_DELETE_VEHICLE: (vehicleId) => `${API_BASE}/api/seller/delete-vehicle/${vehicleId}/`,
     // Buyer
     BUYER_TRANSACTIONS: `${API_BASE}/api/buyer/transactions/`,
     // Admin extra
