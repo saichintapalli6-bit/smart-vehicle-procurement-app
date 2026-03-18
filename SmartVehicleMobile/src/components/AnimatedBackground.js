@@ -9,13 +9,13 @@ const VEHICLES = ["🚗", "🚕", "🚙", "🏎️", "🚓", "🚑", "🚒", "�
 const Vehicle = ({ emoji, startX, startY, onComplete }) => {
     const animatedPos = useRef(new Animated.ValueXY({ x: startX, y: startY })).current;
     const opacity = useRef(new Animated.Value(1)).current;
-    
+
     useEffect(() => {
         const angle = Math.random() * Math.PI * 2;
         const distance = Math.random() * 400 + 200;
         const destinationX = startX + Math.cos(angle) * distance;
         const destinationY = startY + Math.sin(angle) * distance;
-        
+
         Animated.parallel([
             Animated.timing(animatedPos, {
                 toValue: { x: destinationX, y: destinationY },
@@ -64,7 +64,7 @@ const AnimatedBackground = React.memo(({ colors, particleColor }) => {
             const emoji = VEHICLES[Math.floor(Math.random() * VEHICLES.length)];
             newVehicles.push({ id, x, y, emoji });
         }
-        
+
         setVehicles(prev => [...prev, ...newVehicles]);
     }, [vehicles.length]);
 
@@ -89,6 +89,12 @@ const AnimatedBackground = React.memo(({ colors, particleColor }) => {
     const removeVehicle = (id) => {
         setVehicles(prev => prev.filter(v => v.id !== id));
     };
+    // const defaultColors = colors || [
+    //     'rgba(250, 250, 250, 0.95)',
+    //     'rgba(245, 245, 245, 0.90)',
+    //     'rgba(235, 235, 235, 0.85)',
+    //     'rgba(220, 220, 220, 0.80)'
+    // ];
 
     const defaultColors = colors || [
         'rgba(20, 18, 25, 0.92)',
@@ -106,12 +112,12 @@ const AnimatedBackground = React.memo(({ colors, particleColor }) => {
                 end={{ x: 1, y: 1 }}
             />
             {vehicles.map(v => (
-                <Vehicle 
-                    key={v.id} 
-                    emoji={v.emoji} 
-                    startX={v.x} 
-                    startY={v.y} 
-                    onComplete={() => removeVehicle(v.id)} 
+                <Vehicle
+                    key={v.id}
+                    emoji={v.emoji}
+                    startX={v.x}
+                    startY={v.y}
+                    onComplete={() => removeVehicle(v.id)}
                 />
             ))}
         </View>
@@ -133,4 +139,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default AnimatedBackground;
+export default AnimatedBackground;
