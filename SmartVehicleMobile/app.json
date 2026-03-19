@@ -36,6 +36,12 @@
         "projectId": "ffd95fcd-5256-4505-8337-c26fc0f49a0b"
       }
     },
-    "owner": "chsaisantosh"
+    "owner": "chsaisantosh",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ffd95fcd-5256-4505-8337-c26fc0f49a0b"
+    }
   }
 }
