@@ -38,10 +38,13 @@
     },
     "owner": "chsaisantosh",
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "sdkVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/ffd95fcd-5256-4505-8337-c26fc0f49a0b"
+      "url": "https://u.expo.dev/ffd95fcd-5256-4505-8337-c26fc0f49a0b",
+      "checkAutomatically": "ON_LOAD",
+      "enabled": true,
+      "channel": "production"
     }
   }
 }
